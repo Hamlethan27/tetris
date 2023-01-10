@@ -1,0 +1,7 @@
+ROWS = 10
+COLUMNS = 20
+SIZE_OF_CELL = 30
+WIDTH = 560
+HEIGHT = 750
+TITLE = "Tetris"
+BG_COLOR = "yellow"
