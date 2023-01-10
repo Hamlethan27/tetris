@@ -1,7 +1,10 @@
 ROWS = 10
 COLUMNS = 20
 SIZE_OF_CELL = 30
-WIDTH = 560
-HEIGHT = 750
+WIDTH = 550
+HEIGHT = 645
 TITLE = "Tetris"
-BG_COLOR = "yellow"
+BG_COLOUR = "white"
+# BG_IMAGE = url()
+FONT_FAMILY = 'ariel'
+FONT_SIZE = 16

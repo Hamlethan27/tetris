@@ -1,46 +1,84 @@
-# from tkinter import ttk
-# from tkinter import *
-# from constants import *
-#
-# window = Tk()
-# window.title(TITLE)
-# window.geometry(f"{WIDTH+40}x{HEIGHT+40}")
-# window.configure()
-# # window.resizable(False, False)
-# s = ttk.Style()
-# s.configure('game', background="#B2DFDB")
-# gameFrame = ttk.Frame(master=window, width=WIDTH, height=HEIGHT, padding=20)
-# gameFrame.configure(style='game')
-#
-#
-# canvas = Canvas(master=gameFrame, width=WIDTH, height=HEIGHT, bg='lime', highlightthickness=0)
-# grid = [canvas.create_rectangle(x * SIZE_OF_CELL, y * SIZE_OF_CELL, (x+1) * SIZE_OF_CELL, (y+1) * SIZE_OF_CELL, fill="white") for x in range(ROWS) for y in range(COLUMNS)]
-# score = 0
-# record = 0
-# canvas.create_text(330, 30, text="TETRIS", fill='black', font=('aerial', 45), anchor=NW)
-# canvas.create_text(400, 400, text="SCORE", fill='black', font=('aerial', 15), anchor=NW)
-# canvas.create_text(400, 450, text=score, fill='black', font=('aerial', 15), anchor=NW)
-# canvas.create_text(385, 600, text="BEST SCORE", fill='black', font=('aerial', 15), anchor=NW)
-# canvas.create_text(385, 650, text=record, fill='black', font=('aerial', 15), anchor=NW)
-#
-# # print(grid.configure(bg="yellow"))
-# gameFrame.pack()
-# canvas.pack()
-# window.mainloop()
-
 from tkinter import *
-from tkinter import ttk
+from tkinter import ttk, Canvas
+import tkinter as tk
+from random import *
+from constants import *
+from random import choice
+from copy import deepcopy
 
-root = Tk()
-root.title("METANIT.COM")
-root.geometry("500x500")
-s = ttk.Style()
-s.configure(style='my.frame', background='#000000', padding=10, foreground="#ffffff")
-ttk.Style().configure(".", font="helvetica 13", foreground="#004D40", padding=8, background="#B2DFDB")
+window = Tk()
+window.title(TITLE)
+window.geometry(f"{WIDTH}x{HEIGHT}")
 
-frame = ttk.Frame(master=root, width=500, height=500, style=s.configure('my.framed'))
-ttk.Label(master=frame, text="Hello World!").pack(anchor=NW, padx=6, pady=6)
-ttk.Label(master=frame, text="Hello World!").pack(anchor=NW, padx=6, pady=6)
+gameFrame = Frame(window, bg="yellow", padx=50, pady=20)
+
+tetrisFrame = Frame(gameFrame)
+tetris = Canvas(tetrisFrame, height=COLUMNS * SIZE_OF_CELL + 1, width=ROWS * SIZE_OF_CELL + 1, bg=BG_COLOUR,
+                highlightthickness=0)
+grid = [tetris.create_rectangle(x * SIZE_OF_CELL, y * SIZE_OF_CELL, (x + 1) * SIZE_OF_CELL, (y + 1) * SIZE_OF_CELL) for
+        x in range(ROWS) for y in range(COLUMNS)]
+
+infoFrame = Frame(gameFrame, height=600, width=WIDTH - 320, highlightthickness=20)
+score = 0
+record = 0
+scoreFrame = Frame(infoFrame)
+recordFrame = Frame(infoFrame)
+nextShapeFrame = Frame(infoFrame)
+nextShapeGrid = Canvas(nextShapeFrame, width=SIZE_OF_CELL * 4, height=SIZE_OF_CELL * 4)
+Label(scoreFrame, text="Score: ", font=[FONT_FAMILY, FONT_SIZE]).pack()
+Label(scoreFrame, text=score, font=[FONT_FAMILY, FONT_SIZE]).pack()
+Label(recordFrame, text="Record: ", font=[FONT_FAMILY, FONT_SIZE]).pack()
+Label(recordFrame, text=score, font=[FONT_FAMILY, FONT_SIZE]).pack()
+
+shapes = [[(-1, 0), (-2, 0), (0, 0), (1, 0)],  # I
+          [(0, -1), (-1, -1), (-1, 0), (0, 0)],  # O
+          [(-1, 0), (-1, 1), (0, 0), (0, -1)],  # S
+          [(0, 0), (-1, 0), (0, 1), (-1, -1)],  # Z
+          [(0, 0), (0, -1), (0, 1), (-1, -1)],  # J
+          [(0, 0), (0, -1), (0, 1), (1, -1)],  # L
+          [(0, 0), (0, -1), (0, 1), (-1, 0)]]  # T
+
+shapesOnGrid = [[[x + ROWS // 2, y + 1, 1, 1] for x, y in figPos] for figPos in shapes]
 
 
-root.mainloop()
+def rgb_to_hex(r, g, b):
+    return '#' + '{:X}{:X}{:X}'.format(r, g, b)
+
+
+shape, nextShape = deepcopy(choice(shapesOnGrid)), deepcopy(choice(shapesOnGrid))
+red = round(randrange(20, 255))
+green = round(randrange(20, 255))
+blue = round(randrange(20, 255))
+color = rgb_to_hex(red, green, blue)
+
+gameFrame.pack()
+tetrisFrame.pack(side=LEFT)
+tetris.pack()
+infoFrame.pack(side=RIGHT, padx=10)
+scoreFrame.pack(pady=20)
+recordFrame.pack(pady=20)
+
+while (True):
+
+    for i in range(4):
+        horizontalPart = shape[i][0] * SIZE_OF_CELL
+        verticalPart = shape[i][1] * SIZE_OF_CELL
+        tetris.create_rectangle(horizontalPart, verticalPart, horizontalPart + SIZE_OF_CELL,
+                                verticalPart + SIZE_OF_CELL,
+                                fill=color)
+    down = 0
+    while(down != COLUMNS):
+        horizontalPart = shape[i][0] * SIZE_OF_CELL + down
+        verticalPart = shape[i][1] * SIZE_OF_CELL
+        tetris.create_rectangle(horizontalPart, verticalPart, horizontalPart + SIZE_OF_CELL,
+                                verticalPart + SIZE_OF_CELL,
+                                fill=BG_COLOUR)
+        down += 1
+        horizontalPart = shape[i][0] * SIZE_OF_CELL + down
+        verticalPart = shape[i][1] * SIZE_OF_CELL
+        tetris.create_rectangle(horizontalPart, verticalPart, horizontalPart + SIZE_OF_CELL,
+                                verticalPart + SIZE_OF_CELL,
+                                fill=color)
+
+
+window.mainloop()
