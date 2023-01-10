@@ -1,34 +1,26 @@
 from tkinter import *
-from tkinter import ttk, Canvas
-import tkinter as tk
+from tkinter import Canvas, messagebox
 from random import *
 from constants import *
 from random import choice
-from copy import deepcopy
+import copy
+import time
+def on_closing():
+    global app_running
+    if messagebox.askokcancel("Выход из приложения", "Хотите выйти из приложения?"):
+        app_running = False
 
+
+app_running = True
 window = Tk()
 window.title(TITLE)
 window.geometry(f"{WIDTH}x{HEIGHT}")
-
-gameFrame = Frame(window, bg="yellow", padx=50, pady=20)
-
-tetrisFrame = Frame(gameFrame)
-tetris = Canvas(tetrisFrame, height=COLUMNS * SIZE_OF_CELL + 1, width=ROWS * SIZE_OF_CELL + 1, bg=BG_COLOUR,
-                highlightthickness=0)
-grid = [tetris.create_rectangle(x * SIZE_OF_CELL, y * SIZE_OF_CELL, (x + 1) * SIZE_OF_CELL, (y + 1) * SIZE_OF_CELL) for
-        x in range(ROWS) for y in range(COLUMNS)]
-
-infoFrame = Frame(gameFrame, height=600, width=WIDTH - 320, highlightthickness=20)
-score = 0
-record = 0
-scoreFrame = Frame(infoFrame)
-recordFrame = Frame(infoFrame)
-nextShapeFrame = Frame(infoFrame)
-nextShapeGrid = Canvas(nextShapeFrame, width=SIZE_OF_CELL * 4, height=SIZE_OF_CELL * 4)
-Label(scoreFrame, text="Score: ", font=[FONT_FAMILY, FONT_SIZE]).pack()
-Label(scoreFrame, text=score, font=[FONT_FAMILY, FONT_SIZE]).pack()
-Label(recordFrame, text="Record: ", font=[FONT_FAMILY, FONT_SIZE]).pack()
-Label(recordFrame, text=score, font=[FONT_FAMILY, FONT_SIZE]).pack()
+window.resizable(False, False)
+gameFrame = Frame(window, bg="lime", padx=50, pady=20)
+gameFrame.pack()
+tetris = Canvas(gameFrame, height=COLUMNS * SIZE_OF_CELL + 1, width=ROWS * SIZE_OF_CELL + 1, bg=BG_COLOUR, highlightthickness=0)
+tetris.pack()
+grid = [tetris.create_rectangle(x * SIZE_OF_CELL, y * SIZE_OF_CELL, (x + 1) * SIZE_OF_CELL, (y + 1) * SIZE_OF_CELL) for x in range(ROWS) for y in range(COLUMNS)]
 
 shapes = [[(-1, 0), (-2, 0), (0, 0), (1, 0)],  # I
           [(0, -1), (-1, -1), (-1, 0), (0, 0)],  # O
@@ -38,47 +30,141 @@ shapes = [[(-1, 0), (-2, 0), (0, 0), (1, 0)],  # I
           [(0, 0), (0, -1), (0, 1), (1, -1)],  # L
           [(0, 0), (0, -1), (0, 1), (-1, 0)]]  # T
 
-shapesOnGrid = [[[x + ROWS // 2, y + 1, 1, 1] for x, y in figPos] for figPos in shapes]
+shapesOnGrid = [[[x + ROWS // 2, y + 1,1,1] for x, y in figPos] for figPos in shapes]
+field = [[0 for i in range(ROWS)] for j in range(COLUMNS)]
+anim_count, anim_speed, anim_limit = 0, 60, 2000
+dx, rotate = 0, False
 
 
-def rgb_to_hex(r, g, b):
-    return '#' + '{:X}{:X}{:X}'.format(r, g, b)
+def rgbToHex(color:[]):
+    return "#" + ('{:x}{:x}{:x}').format(color[0], color[1], color[2])
 
 
-shape, nextShape = deepcopy(choice(shapesOnGrid)), deepcopy(choice(shapesOnGrid))
-red = round(randrange(20, 255))
-green = round(randrange(20, 255))
-blue = round(randrange(20, 255))
-color = rgb_to_hex(red, green, blue)
-
-gameFrame.pack()
-tetrisFrame.pack(side=LEFT)
-tetris.pack()
-infoFrame.pack(side=RIGHT, padx=10)
-scoreFrame.pack(pady=20)
-recordFrame.pack(pady=20)
-
-while (True):
-
-    for i in range(4):
-        horizontalPart = shape[i][0] * SIZE_OF_CELL
-        verticalPart = shape[i][1] * SIZE_OF_CELL
-        tetris.create_rectangle(horizontalPart, verticalPart, horizontalPart + SIZE_OF_CELL,
-                                verticalPart + SIZE_OF_CELL,
-                                fill=color)
-    down = 0
-    while(down != COLUMNS):
-        horizontalPart = shape[i][0] * SIZE_OF_CELL + down
-        verticalPart = shape[i][1] * SIZE_OF_CELL
-        tetris.create_rectangle(horizontalPart, verticalPart, horizontalPart + SIZE_OF_CELL,
-                                verticalPart + SIZE_OF_CELL,
-                                fill=BG_COLOUR)
-        down += 1
-        horizontalPart = shape[i][0] * SIZE_OF_CELL + down
-        verticalPart = shape[i][1] * SIZE_OF_CELL
-        tetris.create_rectangle(horizontalPart, verticalPart, horizontalPart + SIZE_OF_CELL,
-                                verticalPart + SIZE_OF_CELL,
-                                fill=color)
+def getRandomColor():
+    return randrange(30, 255), randrange(30, 255), randrange(30, 255)
 
 
-window.mainloop()
+def check_borders():
+    for i in range(len(shape)):
+        if shape[i][0] < 0 or shape[i][0] > ROWS - 1:
+            return False
+        elif shape[i][1] > COLUMNS - 1 or field[shape[i][1]][shape[i][0]]:
+            return False
+    return True
+
+
+def move(arrow):
+    global rotate, anim_limit, dx
+    if arrow.keysym == 'Up':
+        rotate = True
+    elif arrow.keysym == 'Down':
+        anim_limit = 100
+    elif arrow.keysym == 'Left':
+        dx = -1
+    elif arrow.keysym == 'Right':
+        dx = 1
+
+
+tetris.bind_all("<KeyPress-Up>", move)
+tetris.bind_all("<KeyPress-Down>", move)
+tetris.bind_all("<KeyPress-Left>", move)
+tetris.bind_all("<KeyPress-Right>", move)
+
+shape = copy.deepcopy(choice(shapesOnGrid))
+print(type(shape[0][0]))
+color = getRandomColor()
+
+
+while app_running:
+    if app_running:
+
+        # move x
+        previousShape = copy.deepcopy(shape)
+        for i in range(4):
+            shape[i][0] = shape[i][0] + dx
+            if not check_borders():
+                shape = copy.deepcopy(previousShape)
+                break
+
+        # move y
+        anim_count += anim_speed
+        if anim_count > anim_limit:
+            anim_count = 0
+            previousShape = copy.deepcopy(shape)
+            for i in range(4):
+                shape[i][1] += 1
+                if not check_borders():
+                    for i in range(4):
+                        field[previousShape[i][1]][previousShape[i][0]] = color
+                    shape, color = copy.deepcopy(choice(shapes)), getRandomColor()
+                    anim_limit = 2000
+                    break
+
+        # rotate
+        center = shape[0]
+        previousShape = copy.deepcopy(shape)
+        if rotate:
+            for i in range(4):
+                x = shape[i][1] - center[1]
+                y = shape[i][0] - center[0]
+                shape[i][0] = center[0] - x
+                shape[i][1] = center[1] + y
+                if not check_borders():
+                    shape = copy.deepcopy(previousShape)
+                    break
+        # check lines
+        line, lines = COLUMNS - 1, 0
+        for row in range(COLUMNS - 1, -1, -1):
+            count = 0
+            for i in range(ROWS):
+                if field[row][i]:
+                    count += 1
+                field[line][i] = field[row][i]
+            if count < ROWS:
+                line -= 1
+            else:
+                anim_speed += 3
+                lines += 1
+
+        fig = []
+        # draw figure
+        for i in range(4):
+            figure_rect_x = shape[i][0] * SIZE_OF_CELL
+            figure_rect_y = shape[i][1] * SIZE_OF_CELL
+            fig.append(
+                tetris.create_rectangle(figure_rect_x, figure_rect_y, figure_rect_x + SIZE_OF_CELL, figure_rect_y + SIZE_OF_CELL,
+                                        fill=rgbToHex(color)))
+
+        # draw field
+        for y, raw in enumerate(field):
+            for x, col in enumerate(raw):
+                if col:
+                    figure_rect_x, figure_rect_y = x * SIZE_OF_CELL, y * SIZE_OF_CELL
+                    fig.append(tetris.create_rectangle(figure_rect_x, figure_rect_y, figure_rect_x + SIZE_OF_CELL,
+                                                       figure_rect_y + SIZE_OF_CELL, fill=rgbToHex(col)))
+
+
+
+        # game over
+        for i in range(ROWS):
+            if field[0][i]:
+
+                field = [[0 for i in range(ROWS)] for j in range(COLUMNS)]
+                anim_count, anim_speed, anim_limit = 0, 60, 2000
+                # for item in grid:
+                #     tetris.itemconfigure(item, fill=rgbToHex(getRandomColor()))
+                #     time.sleep(0.005)
+                #     window.update_idletasks()
+                #     window.update()
+                #
+                # for item in grid:
+                #     tetris.itemconfigure(item, fill="")
+
+        dx, rotate = 0, False
+        window.update_idletasks()
+        window.update()
+        for id_fig in fig:
+            tetris.delete(id_fig)
+    time.sleep(0.01)
+
+window.destroy()

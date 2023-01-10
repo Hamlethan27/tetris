@@ -1,5 +1,5 @@
-ROWS = 10
-COLUMNS = 20
+ROWS = 10 # width
+COLUMNS = 20 # height
 SIZE_OF_CELL = 30
 WIDTH = 550
 HEIGHT = 645
