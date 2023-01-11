@@ -36,13 +36,13 @@ shapes = [[(-1, 0), (-2, 0), (0, 0), (1, 0)],    # I
           [(0, 0), (0, -1), (0, 1), (1, -1)],    # L
           [(0, 0), (0, -1), (0, 1), (-1, 0)]]    # T
 
-figures = [[[x + COLUMNS // 2, y + 1] for x, y in fig_pos] for fig_pos in shapes]
+gridShapes = [[[x + COLUMNS // 2, y + 1] for x, y in fig_pos] for fig_pos in shapes]
 
 squares = [[0]*COLUMNS for j in range(ROWS)]
 
 fallCount, fallSpeed, fallDelay = 0, 60, 2000
 
-shape = copy.deepcopy(random.choice(figures))
+shape = copy.deepcopy(random.choice(gridShapes))
 
 
 def isBorder(shape):                  #координаты частей формы
@@ -96,7 +96,7 @@ while isRunning:
                 if isBorder(shape[i]):
                     for j in range(4):
                         squares[previousShape[j][1]][previousShape[j][0]] = SHAPE_COLOR
-                    shape = copy.deepcopy(random.choice(figures))  # новая фигура
+                    shape = copy.deepcopy(random.choice(gridShapes))  # новая фигура
                     fallDelay = 2000
                     break
 
