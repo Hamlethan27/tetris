@@ -1,5 +1,5 @@
 # tetris
-SE-2210: Creating tetris using tkinter
+SE-2210: Creating tetris using tkinter  
 There are constants that you can change in corresponding python file
 
 COLUMNS = 20  
