@@ -28,19 +28,19 @@ tetris.pack(padx=20, pady=20)
 
 grid = [tetris.create_rectangle(x * SIZE_OF_CELL, y * SIZE_OF_CELL, (x + 1) * SIZE_OF_CELL, (y + 1) * SIZE_OF_CELL) for x in range(COLUMNS) for y in range(ROWS)]
 
-shapes = [[(-1, 0), (-2, 0), (0, 0), (1, 0)],  # I
+shapes = [[(-1, 0), (-2, 0), (0, 0), (1, 0)],    # I
           [(0, -1), (-1, -1), (-1, 0), (0, 0)],  # O
-          [(-1, 0), (-1, 1), (0, 0), (0, -1)],  # S
-          [(0, 0), (-1, 0), (0, 1), (-1, -1)],  # Z
-          [(0, 0), (0, -1), (0, 1), (-1, -1)],  # J
-          [(0, 0), (0, -1), (0, 1), (1, -1)],  # L
-          [(0, 0), (0, -1), (0, 1), (-1, 0)]]  # T
+          [(-1, 0), (-1, 1), (0, 0), (0, -1)],   # S
+          [(0, 0), (-1, 0), (0, 1), (-1, -1)],   # Z
+          [(0, 0), (0, -1), (0, 1), (-1, -1)],   # J
+          [(0, 0), (0, -1), (0, 1), (1, -1)],    # L
+          [(0, 0), (0, -1), (0, 1), (-1, 0)]]    # T
 
 figures = [[[x + COLUMNS // 2, y + 1] for x, y in fig_pos] for fig_pos in shapes]
 
 squares = [[0]*COLUMNS for j in range(ROWS)]
 
-anim_count, anim_speed, anim_limit = 0, 60, 2000
+fallCount, fallSpeed, fallDelay = 0, 60, 2000
 
 shape = copy.deepcopy(random.choice(figures))
 
@@ -54,15 +54,15 @@ def isBorder(shape):                  #координаты частей фор�
 
 
 def move(arrow):
-    global rotate, anim_limit, dx
+    global rotate, fallDelay, X
     if arrow.keysym == 'Up':
         rotate = True
     elif arrow.keysym == 'Down':
-        anim_limit = 100
+        fallDelay = 100
     elif arrow.keysym == 'Left':
-        dx = -1
+        X = -1
     elif arrow.keysym == 'Right':
-        dx = 1
+        X = 1
 
 
 tetris.bind_all("<KeyPress-Up>", move)
@@ -72,7 +72,7 @@ tetris.bind_all("<KeyPress-Right>", move)
 
 
 isRunning = True
-dx, rotate = 0, False
+X, rotate = 0, False
 while isRunning:
     if isRunning:
         previousShape = copy.deepcopy(shape)
@@ -80,16 +80,16 @@ while isRunning:
 
         # horizontal movement
         for i in range(4):
-            shape[i][0] += dx
+            shape[i][0] += X
             if isBorder(shape[i]):
                 shape = copy.deepcopy(previousShape)
                 break
 
 
         # vertical movement
-        anim_count += anim_speed
-        if anim_count > anim_limit:
-            anim_count = 0
+        fallCount += fallSpeed
+        if fallCount > fallDelay:
+            fallCount = 0
             previousShape = copy.deepcopy(shape)
             for i in range(4):
                 shape[i][1] += 1
@@ -97,7 +97,7 @@ while isRunning:
                     for j in range(4):
                         squares[previousShape[j][1]][previousShape[j][0]] = SHAPE_COLOR
                     shape = copy.deepcopy(random.choice(figures))  # новая фигура
-                    anim_limit = 2000
+                    fallDelay = 2000
                     break
 
 
@@ -126,7 +126,7 @@ while isRunning:
             if count < COLUMNS:
                 line -= 1
             else:
-                anim_speed += 3
+                fallSpeed += 3
 
         existingShapes = []
         # drawing shape
@@ -151,18 +151,18 @@ while isRunning:
         for i in range(COLUMNS):
             if squares[0][i]:
                 squares = [[0] * COLUMNS for i in range(ROWS)]
-                anim_count, anim_speed, anim_limit = 0, 60, 2000
+                fallCount, fallSpeed, fallDelay = 0, 60, 2000
                 window.update_idletasks()
                 window.update()
                 for item in grid:
                     tetris.itemconfigure(item, fill=TETRIS_BG_COLOR)  # для очищения всех квадратов после переполнения высоты тетриса
 
-        dx, rotate = 0, False
+        X, rotate = 0, False
         window.update_idletasks()
         window.update()
         for i in existingShapes:
-            tetris.delete(i)                # удаление фигур из fig, чтобы не повторялось
-    time.sleep(0.0005)
+            tetris.delete(i)                # удаление фигур из existingShapes, чтобы не повторялось
+    time.sleep(0.005)
 
 
 window.destroy()
