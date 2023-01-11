@@ -1,10 +1,9 @@
-ROWS = 10 # width
-COLUMNS = 20 # height
+COLUMNS = 20
+ROWS = 30
 SIZE_OF_CELL = 30
-WIDTH = 550
-HEIGHT = 645
+WIDTH = COLUMNS * SIZE_OF_CELL
+HEIGHT = ROWS * SIZE_OF_CELL
 TITLE = "Tetris"
-BG_COLOUR = "white"
-# BG_IMAGE = url()
-FONT_FAMILY = 'ariel'
-FONT_SIZE = 16
+BG_COLOR = "yellow"
+SHAPE_COLOR = "lime"
+TETRIS_BG_COLOR = "orange"
