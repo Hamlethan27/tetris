@@ -13,7 +13,7 @@ window.resizable(False, False)
 
 def on_closing():
     global isRunning
-    if messagebox.askokcancel("Выход из приложения", "Хотите выйти из приложения?"):
+    if messagebox.askokcancel("App exit", "Do you want to quit the app?"):
         isRunning = False
 
 
@@ -36,16 +36,16 @@ shapes = [[(-1, 0), (-2, 0), (0, 0), (1, 0)],    # I
           [(0, 0), (0, -1), (0, 1), (1, -1)],    # L
           [(0, 0), (0, -1), (0, 1), (-1, 0)]]    # T
 
-gridShapes = [[[x + COLUMNS // 2, y + 1] for x, y in fig_pos] for fig_pos in shapes]
+gridShapes = [[[x + COLUMNS // 2, y+1] for x, y in fig_pos] for fig_pos in shapes]        # Positions of shapes in the center of the board
 
-squares = [[0]*COLUMNS for j in range(ROWS)]
+squares = [[0]*COLUMNS for j in range(ROWS)]       # An array of the values of the squares on which the figures have fallen
 
 fallCount, fallSpeed, fallDelay = 0, 60, 2000
 
 shape = copy.deepcopy(random.choice(gridShapes))
 
 
-def isBorder(shape):                  #координаты частей формы
+def isBorder(shape):
     if shape[0] < 0 or shape[0] > COLUMNS - 1:
         return True
     elif shape[1] > ROWS - 1 or squares[shape[1]][shape[0]]:
@@ -95,8 +95,8 @@ while isRunning:
                 shape[i][1] += 1
                 if isBorder(shape[i]):
                     for j in range(4):
-                        squares[previousShape[j][1]][previousShape[j][0]] = SHAPE_COLOR
-                    shape = copy.deepcopy(random.choice(gridShapes))  # новая фигура
+                        squares[previousShape[j][1]][previousShape[j][0]] = SHAPE_COLOR     #the squares where the figure fell are filled with SHAPE_COLOR
+                    shape = copy.deepcopy(random.choice(gridShapes))
                     fallDelay = 2000
                     break
 
@@ -108,7 +108,7 @@ while isRunning:
             for i in range(4):
                 x = shape[i][1] - center[1]
                 y = shape[i][0] - center[0]
-                shape[i][0] = center[0] - x #  just put the opposite sign to change the direction of rotation (counterclockwise)
+                shape[i][0] = center[0] - x     # just put the opposite sign to change the direction of rotation (counterclockwise)
                 shape[i][1] = center[1] + y
                 if isBorder(shape[i]):
                     shape = copy.deepcopy(previousShape)
@@ -133,13 +133,14 @@ while isRunning:
         for i in range(4):
             horizontal = shape[i][0] * SIZE_OF_CELL
             vertical = shape[i][1] * SIZE_OF_CELL
-            existingShapes.append(tetris.create_rectangle(horizontal, vertical, horizontal + SIZE_OF_CELL, vertical + SIZE_OF_CELL, fill=SHAPE_COLOR)) # чтобы не шла полоса за фигурой
+            existingShapes.append(tetris.create_rectangle(horizontal, vertical, horizontal + SIZE_OF_CELL, vertical + SIZE_OF_CELL, fill=SHAPE_COLOR))
             if isBorder(shape[i]):
+                shape = copy.deepcopy(previousShape)
                 break
 
 
-        # drawing color squares in grid
-        for y, row in enumerate(squares):
+        # saving color squares in grid
+        for y, row in enumerate(squares):                 #enumerate returns two values - index and value
             for x, col in enumerate(row):
                 if col:
                     parts = [x * SIZE_OF_CELL, y * SIZE_OF_CELL]
@@ -150,12 +151,10 @@ while isRunning:
         # if top line is full
         for i in range(COLUMNS):
             if squares[0][i]:
-                squares = [[0] * COLUMNS for i in range(ROWS)]
+                squares = [[0] * COLUMNS for i in range(ROWS)] # to clear all squares after the tetris height overflow
                 fallCount, fallSpeed, fallDelay = 0, 60, 2000
-                window.update_idletasks()
-                window.update()
                 for item in grid:
-                    tetris.itemconfigure(item, fill=TETRIS_BG_COLOR)  # для очищения всех квадратов после переполнения высоты тетриса
+                    tetris.itemconfigure(item, fill=TETRIS_BG_COLOR)  # to fill all squares with this color after the tetris height overflow
 
         X, rotate = 0, False
         window.update_idletasks()
